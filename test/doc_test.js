@@ -123,18 +123,55 @@
   });
 
   testDoc("undoConflict", "A='ab\ncd\nef' B<~A", function(a, b) {
+    a.setCursor(Pos(0));
     a.replaceRange("x", Pos(0));
     a.replaceRange("z", Pos(2));
-    // This should clear the first undo event in a, but not the second
     b.replaceRange("y", Pos(0));
+    eqPos(a.getCursor(), Pos(0, 4));
     a.undo(); a.undo();
-    eqAll("abxy\ncd\nef", a, b);
+    eqAll("aby\ncd\nef", a, b);
+    eqPos(a.getCursor(), Pos(0, 3));
     a.replaceRange("u", Pos(2));
     a.replaceRange("v", Pos(0));
-    // This should clear both events in a
     b.replaceRange("w", Pos(0));
     a.undo(); a.undo();
-    eqAll("abxyvw\ncd\nefu", a, b);
+    eqAll("abyw\ncd\nef", a, b);
+    eqPos(a.getCursor(), Pos(0, 4));
+  });
+
+  testDoc("undoConflictMultiLine", "A='ab\ncd\nef' B<~A", function(a, b) {
+    a.replaceRange("x\n_", Pos(0));
+    a.replaceRange("z\n+", Pos(2));
+    b.replaceRange("y\n*", Pos(1));
+    eqAll("abx\n_y\n*\ncdz\n+\nef", a, b);
+    a.undo(); a.undo();
+    eqAll("aby\n*\ncd\nef", a, b);
+    a.replaceRange("u\n_", Pos(2));
+    a.replaceRange("v\n+", Pos(0));
+    b.replaceRange("w\n*", Pos(0));
+    a.undo(); a.undo();
+    eqAll("aby\n*w\n*\ncd\nef", a, b);
+  });
+
+  testDoc("undoConflictSameLine", "A='ab\ncd\nef' B<~A", function(a, b) {
+    a.setCursor(Pos(0));
+    a.replaceRange("x", Pos(0));
+    a.replaceRange("z", Pos(0));
+    b.replaceRange("y", Pos(0, 2));
+    eqAll("abyxz\ncd\nef", a, b);
+    //eqPos(a.getCursor(), Pos(0, 5));
+    a.undo(); a.undo();
+    eqPos(a.getCursor(), Pos(0, 3));
+    eqAll("aby\ncd\nef", a, b);
+    a.replaceRange("u", Pos(1));
+    a.replaceRange("v", Pos(1));
+    b.replaceRange("w", Pos(1));
+    a.undo(); a.undo();
+    eqAll("aby\ncdw\nef", a, b);
+    eqPos(a.getCursor(), Pos(0, 3));
+    a.replaceRange("x", Pos(0));
+    b.replaceRange("", Pos(0,0), Pos(0,2));
+    eqAll("yx\ncdw\nef", a, b);
   });
 
   testDoc("doubleRebase", "A='ab\ncd\nef\ng' B<~A C<B", function(a, b, c) {
