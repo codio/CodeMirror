@@ -8,6 +8,9 @@
 })(function(CodeMirror) {
   "use strict";
 
+  var LEFT_KEY = 37;
+  var RIGHT_KEY = 39;
+
   CodeMirror.defineOption("navigateWithinSoftTabs", null, function (cm, val, old) {
     var prev = old == CodeMirror.Init ? null : old;
     if (val == prev) return
@@ -36,7 +39,7 @@
     }
     var state = cmInstance.state.navigateWithinSoftTabs;
     var isSelection = cmInstance.somethingSelected();
-    if (event.which !== 37 && event.which !== 39) {
+    if (event.which !== LEFT_KEY && event.which !== RIGHT_KEY) {
       return;
     }
     var start = state.startPos;
@@ -69,8 +72,8 @@
     var state = cmInstance.state.navigateWithinSoftTabs;
     state.tabSize = cmInstance.options.tabSize;
     state.direction = state.tabSize;
-    if (event.which === 37 || event.which === 39) {
-      if (event.which === 37) {
+    if (event.which === LEFT_KEY || event.which === RIGHT_KEY) {
+      if (event.which === LEFT_KEY) {
         state.direction = -(state.tabSize);
       }
       state.startPos = cmInstance.getCursor();
