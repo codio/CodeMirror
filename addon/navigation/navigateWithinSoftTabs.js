@@ -17,12 +17,14 @@
     if (prev) {
       // turn off navigation
       cm.off("keydown", onKeyDown);
+      cm.off("mousedown", onMouseDown);
       cm.off('cursorActivity', cursorActivity);
       cm.state.navigateWithinSoftTabs = {};
     }
     if (val) {
       // turn on navigation
       cm.on("keydown", onKeyDown);
+      cm.on("mousedown", onMouseDown);
       cm.on('cursorActivity', cursorActivity);
       cm.state.navigateWithinSoftTabs = {
         tabSize: null,
@@ -33,11 +35,11 @@
   });
 
   function update(cmInstance) {
-    // event sent from
+    var state = cmInstance.state.navigateWithinSoftTabs;
+    var event = state.lastEvent;
     if (!event) {
       return;
     }
-    var state = cmInstance.state.navigateWithinSoftTabs;
     var isSelection = cmInstance.somethingSelected();
     if (event.which !== LEFT_KEY && event.which !== RIGHT_KEY) {
       return;
@@ -77,8 +79,15 @@
         state.direction = -(state.tabSize);
       }
       state.startPos = cmInstance.getCursor();
+      state.lastEvent = event;
     } else {
+      state.lastEvent = null;
       return;
     }
+  }
+
+  function onMouseDown(cmInstance, event) {
+    var state = cmInstance.state.navigateWithinSoftTabs;
+    state.lastEvent = null;
   }
 });
